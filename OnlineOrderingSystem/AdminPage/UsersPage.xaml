@@ -42,7 +42,7 @@
                                 Binding="{Binding Age}"
                                 Header="年龄"
                                 IsReadOnly="True" />
-            <DataGridTextColumn Width="100"
+            <DataGridTextColumn Width="80"
                                 Binding="{Binding Sex}"
                                 Header="性别"
                                 IsReadOnly="True" />
