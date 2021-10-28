@@ -16,12 +16,13 @@ namespace Model
         public string Age { set; get; }
         public int Sex { set; get; }
         public string Remark { set; get; }
+        public string Col { get; set; }
 
         public User()
         {
 
         }
-        public User(string phone,string name,string password,string address,string email,string age,int sex,string remark)
+        public User(string phone,string name,string password,string address,string email,string age,int sex,string remark,string col)
         {
             UserName = name;
             Phone = phone;
@@ -31,6 +32,7 @@ namespace Model
             Age = age;
             Sex = sex;
             Remark = remark;
+            Col = col;
         }
     }
 }

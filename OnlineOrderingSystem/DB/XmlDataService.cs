@@ -31,5 +31,27 @@ namespace OnlineOrderingSystem.DB
             }
             return dishList;
         }
+
+        public List<Dish> GetDishes(string sql)
+        {
+            List<Dish> dishList = new List<Dish>();
+            string ImgFile = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Img");
+            var res = Db.ExecuteQuery(sql);
+            while (res.Read())
+            {
+                Dish dish = new Dish();
+                dish.Id = res.GetInt32(0);
+                dish.Img = System.IO.Path.Combine(ImgFile, res.GetString(1));
+                dish.Name = res.GetString(2);
+                dish.Category = res.GetString(3);
+                dish.Comment = res.GetString(4);
+                dish.Score = res.GetString(5);
+                dish.Price = res.GetString(6);
+                dishList.Add(dish);
+            }
+            return dishList;
+        }
+
+
     }
 }

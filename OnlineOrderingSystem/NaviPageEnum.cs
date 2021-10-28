@@ -12,6 +12,10 @@ namespace OnlineOrderingSystem
         Ordering,
         History,
         Collection,
-        Evaluation
+        Evaluation,
+        Users,
+        AllHistory,
+        AdminOrdering
+
     }
 }

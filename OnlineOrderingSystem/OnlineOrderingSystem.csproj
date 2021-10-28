@@ -93,7 +93,27 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="Admin.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AdminPage\AdminOrderingPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AdminPage\AllHistoryPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AdminPage\UsersPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\PathCheckBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Controls\UpdateOrdering.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -105,6 +125,18 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Admin.xaml.cs">
+      <DependentUpon>Admin.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AdminPage\AdminOrderingPage.xaml.cs">
+      <DependentUpon>AdminOrderingPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AdminPage\AllHistoryPage.xaml.cs">
+      <DependentUpon>AllHistoryPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AdminPage\UsersPage.xaml.cs">
+      <DependentUpon>UsersPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -115,6 +147,10 @@
     <Compile Include="Controls\PathCheckBox.xaml.cs">
       <DependentUpon>PathCheckBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\UpdateOrdering.xaml.cs">
+      <DependentUpon>UpdateOrdering.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\UpdateOrderingEnum.cs" />
     <Compile Include="Converter\BoolToReverseVisiblity.cs" />
     <Compile Include="Converter\ColConverter.cs" />
     <Compile Include="DB\Db.cs" />

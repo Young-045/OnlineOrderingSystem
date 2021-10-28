@@ -51,10 +51,20 @@ namespace OnlineOrderingSystem
             var res=Db.ExecuteQuery("SELECT * FROM UserInfo WHERE phone='"+LPhone+ "' and encryptionPsd='" + EncryptionPsd+"'");
             if(res.Read())
             {
-                MainWindow mainWindow = new MainWindow();
-                mainWindow.SetUser(LPhone);
-                mainWindow.Show();
-                this.Close();
+                if(LPhone.Equals("admin"))
+                {
+                    Admin admin = new Admin();
+                    admin.Show();
+                    this.Close();
+                }
+                else
+                {
+                    MainWindow mainWindow = new MainWindow();
+                    mainWindow.SetUser(LPhone);
+                    mainWindow.Show();
+                    this.Close();
+                }
+                
             }
             else
             {
@@ -76,11 +86,6 @@ namespace OnlineOrderingSystem
                 var RPassword = RegPassword.Password;
                 var EncryptionPsd = Db.GenerateMD5(RPassword);
                 string sql;
-                //var res=Db.ExecuteQuery("SELECT * FROM database WHERE type='table' and name='UserInfo'");
-                //if(!res.Read())
-                //{
-                    
-                //}
                 sql = "CREATE TABLE IF NOT EXISTS UserInfo(phone VARCHAR(11) PRIMARY KEY, name VARCHAR(20), password VARCHAR(40), address VARCHAR(100));";
                 Db.ExecuteNonQuery(sql);
                 sql = string.Format($"INSERT INTO UserInfo(phone, name, encryptionPsd, password, address) VALUES ('{RPhone}','{RName}','{EncryptionPsd}','{RPassword}', '{RAddress}')");
@@ -88,6 +93,7 @@ namespace OnlineOrderingSystem
                 if (flag)
                 {
                     MessageBox.Show("注册成功","Success");
+                    Init(); 
                 }
                 else
                 {
@@ -98,9 +104,19 @@ namespace OnlineOrderingSystem
 
         private void ReturnLogin(object sender, RoutedEventArgs e)
         {
-            IsLogin = true;
+            Init();
         }
 
+        private void Init()
+        {
+            IsLogin = true;
+            RegPhone.Clear();
+            RegName.Clear();
+            RegAddress.Clear();
+            RegPassword.Clear();
+            LoginPhone.Clear();
+            LoginPassword.Clear();
+        }
 
     }
 }

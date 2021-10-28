@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="OnlineOrderingSystem.AdminPage.AllHistoryPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:OnlineOrderingSystem.AdminPage"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:pu="clr-namespace:Panuon.UI.Silver;assembly=Panuon.UI.Silver"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+    <Grid>
+        <DataGrid Grid.Row="1"
+                  Margin="0"
+                  HorizontalContentAlignment="Center"
+                  VerticalContentAlignment="Center"
+                  pu:DataGridHelper.ColumnHorizontalContentAlignment="Center"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="False"
+                  CanUserResizeRows="False"
+                  CanUserSortColumns="False"
+                  FontSize="16"
+                  GridLinesVisibility="Horizontal"
+                  ItemsSource="{Binding HistoryList}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="150"
+                                    Binding="{Binding Phone}"
+                                    Header="用户" />
+                <DataGridTemplateColumn Width="900" Header="清单">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"
+                                       Text="{Binding Dishes}"
+                                       TextWrapping="WrapWithOverflow"
+                                       ToolTip="{Binding Dishes}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Width="100"
+                                    Binding="{Binding Price}"
+                                    Header="价格" />
+                <DataGridTextColumn Width="300"
+                                    Binding="{Binding Time}"
+                                    Header="时间" />
+
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
