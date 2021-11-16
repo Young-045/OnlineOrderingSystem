@@ -1,6 +1,6 @@
 ﻿using Model;
 using OnlineOrderingSystem.Controls;
-using OnlineOrderingSystem.DB;
+using DataDal;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Interfaces;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -19,174 +20,240 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Infra;
+
+using Panuon.UI.Silver.Core;
+using Panuon.UI.Silver;
+using System.Diagnostics;
+using System.Xml.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Microsoft.Win32;
+using NPOI.SS.UserModel;
 
 namespace OnlineOrderingSystem.Pages
 {
     /// <summary>
     /// OrderingPage.xaml 的交互逻辑
     /// </summary>
-    public partial class OrderingPage : UserControl, INotifyPropertyChanged, INaviPage
+    public partial class OrderingPage : UserControl, INotifyPropertyChanged, INaviPage, ICallBack
     {
-        private string _phone;
+       
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
-        private int _count;
-
-        public int Count
+        private bool _isPlay;
+        private ObservableCollection<Channel> _channelList;
+        public ObservableCollection<Channel> ChannelList
         {
-            get { return _count; }
-            set { _count = value; PropertyChanged(this, new PropertyChangedEventArgs("Count")); }
-        }
-
-        private ObservableCollection<DishMenuItem> _selectedDishMenu;
-        public ObservableCollection<DishMenuItem> SelectedDishMenu
-        {
-            get { return _selectedDishMenu; }
-            set { _selectedDishMenu = value; PropertyChanged(this, new PropertyChangedEventArgs("SelectedDishMenu")); }
-        }
-
-        private List<DishMenuItem> _dishMenu;
-        public List<DishMenuItem> DishMenu
-        {
-            get { return _dishMenu; }
-            set { _dishMenu = value; PropertyChanged(this, new PropertyChangedEventArgs("DishMenu")); }
+            get { return _channelList; }
+            set { _channelList = value; PropertyChanged(this, new PropertyChangedEventArgs("ChannelList")); }
         }
         public OrderingPage()
         {
             InitializeComponent();
-            //Loaded += OnLoaded;
-            
-            
             DataContext = this;
+            Loaded += OrderingPage_Loaded;
         }
 
-        private void OnLoaded(object sender, RoutedEventArgs routedEventArgs)
+        private async void OrderingPage_Loaded(object sender, RoutedEventArgs e)
         {
-            //LoadDishMenu();
-            //LoadCol();
-        }
-
-        private void LoadDishMenu()
-        {
-
-            XmlDataService ds = new XmlDataService();
-            var dishes = ds.GetDishes();
-            this.DishMenu = new List<DishMenuItem>();
-            SelectedDishMenu = new ObservableCollection<DishMenuItem>();
-            foreach (var dish in dishes)
-            {
-                DishMenuItem item = new DishMenuItem();
-                item.Dish = dish;
-                this.DishMenu.Add(item);
-            }
-        }
-
-        private void LoadCol()
-        {
-            string colString="";
-            var res = Db.ExecuteQuery("SELECT * FROM UserInfo where phone='"+_phone+"'");
-            while (res.Read())
-            {
-                colString = res.GetString(9);
-            }
-            if (DishMenu == null)
-            {
-                LoadDishMenu();
-            }
-            if (colString.Equals(" "))
-            {
+            ChannelList = new ObservableCollection<Channel>();
+            var currentAssembly = Assembly.GetEntryAssembly();
+            var currentDirectory = new FileInfo(currentAssembly.Location).DirectoryName;
+            if (currentDirectory == null)
                 return;
-            }
-            var colAry = colString.Split('|');
-                    
-            foreach(var item in DishMenu)
+            DirectoryInfo libDirectory;
+            if (AssemblyName.GetAssemblyName(currentAssembly.Location).ProcessorArchitecture == ProcessorArchitecture.X86)
+                libDirectory = new DirectoryInfo(System.IO.Path.Combine(currentDirectory, "LibVlc", "x86"));
+            else
+                libDirectory = new DirectoryInfo(System.IO.Path.Combine(currentDirectory, "LibVlc", "x64"));
+            Logger.Default.Debug("CreatePlayer Start");           
+                myControl.SourceProvider.CreatePlayer(libDirectory);//创建视频播放器
+            Logger.Default.Debug("CreatePlayer End");
+            Vol_Slider.Value = Vol_Slider.Maximum;
+            LoadChannel();
+        }
+
+        private async void LoadChannel()
+        {
+            //var handler = PendingBox.Show("Please wait ...", "Processing", false, Application.Current.MainWindow);
+            var thr = Task.Factory.StartNew(() => 
             {
-                for (int i = 0; i < colAry.Length; i++)
+                ObservableCollection<Channel> list = new ObservableCollection<Channel>();
+                var res = Db.ExecuteQuery("SELECT * FROM PCMedia");
+                while (res.Read())
                 {
-                    if (item.Dish.Id == int.Parse(colAry[i]))
+                    Channel channel = new Channel();
+                    channel.Id = res.GetInt32(0);
+                    channel.Name = res.GetString(1);
+                    channel.Link = res.GetString(2);
+                    list.Add(channel);
+                }
+                return list;
+            });
+            ChannelList = await thr;
+        }
+
+        private void Button_Add(object sender, RoutedEventArgs e)
+        {
+            var name = Channel_Name.Text.Trim();
+            var link = Channel_Link.Text.Trim();
+            if (!(string.IsNullOrEmpty(name) && string.IsNullOrEmpty(link)))
+            {
+                string sql = string.Format($"INSERT INTO PCMedia(name, link) VALUES ('{name}','{link}')");
+                if (DataOp(sql))
+                {
+                    ShowSuccessMessage();
+                }
+                var res = Db.ExecuteQuery("SELECT MAX(id) FROM PCMedia");
+                Channel channel = new Channel();
+                res.Read();
+                channel.Id = res.GetInt32(0);
+                channel.Name = name;
+                channel.Link = link;
+                ChannelList.Add(channel);
+            }
+        }
+
+        private void Vol_play(object sender, RoutedEventArgs e)
+        {
+            if (_isPlay)
+            {
+                Button_VolOp.Content = "play";
+                myControl.SourceProvider.MediaPlayer.Pause();
+                _isPlay = false;
+            }
+            else
+            {
+                
+                Button_VolOp.Content = "pause";
+                myControl.SourceProvider.MediaPlayer.Play();
+                _isPlay = true;
+            }
+        }
+
+        private void Button_Edit(object sender, RoutedEventArgs e)
+        {
+            var op = sender as Button;
+            if (op.Tag != null)
+            {
+                int id = (int)op.Tag;
+                UpdateOrdering updateOrdering = new UpdateOrdering();
+                updateOrdering.Init(this, id);
+                updateOrdering.Show();
+            }
+
+        }
+
+        private void Button_Delete(object sender, RoutedEventArgs e)
+        {
+            var op = sender as Button;
+            if (op.Tag != null)
+            {
+                int id = (int)op.Tag;
+                string sql = "Delete From PCMedia where id = " + id;
+                if (DataOp(sql))
+                {
+                    ShowSuccessMessage();
+                }
+                foreach (var item in ChannelList)
+                {
+                    if (item.Id == id)
                     {
-                        item.IsCol = true;
+                        ChannelList.Remove(item);
+                        break;
                     }
                 }
-                
+            }
+
+        }
+        private void Button_Play(object sender, RoutedEventArgs e)
+        {
+            var op = sender as Button;
+            if (op.Tag != null)
+            {
+                string videourl = (string)op.Tag;                
+                myControl.SourceProvider.MediaPlayer.Play(new Uri(videourl));
+                _isPlay = true;
+                Button_VolOp.Content = "pause";
+                Button_VolOp.IsEnabled = true;
             }
         }
-       
 
-
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Button_Import(object sender, RoutedEventArgs e)
         {
-            var order = new StringBuilder();
-            foreach(var item in SelectedDishMenu)
+            string fName;
+            Microsoft.Win32.OpenFileDialog dialog =
+                new Microsoft.Win32.OpenFileDialog();
+            dialog.InitialDirectory = "C:";
+            dialog.Filter = "xlsx|*.xlsx|xls|.xls";
+            if (dialog.ShowDialog() == true)
             {
-                order.Append(item.Dish.Name + "+");
+                fName = dialog.FileName;
+                ExcelHelper excelHelper = new ExcelHelper(fName);
+                var res = excelHelper.ExcelToDataTable("Sheet1", true);
+                ImportHelper(res);
             }
-            order.Remove(order.Length - 1, 1);
-            var time = DateTime.Now.ToString();
+        }
+
+        private async void ImportHelper(List<Channel> channels)
+        {
+            List<string> sqls = new List<string>();
+            foreach (var item in channels)
+            {
+                string sql = string.Format($"INSERT INTO PCMedia(name, link) VALUES ('{item.Name}','{item.Link}')");
+                sqls.Add(sql);
+            }
+            Db.ImportExecute(sqls);
+            LoadChannel();
+        }
+
+        private void Button_Export(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+
+
+        private bool DataOp(string sql)
+        {
+            return Db.ExecuteNonQuery(sql);
             
-            var sql = "CREATE TABLE IF NOT EXISTS UserOrder(id INTEGER PRIMARY KEY, phone VARCHAR(11), orderDish VARCHAR(300), price INTEGER, time VARCHAR(50))";
-            Db.ExecuteNonQuery(sql);
-            sql = string.Format($"INSERT INTO UserOrder(phone, orderDish, price, time) VALUES ('{_phone}','{order.ToString()}','{Count}', '{time}')");
-            var flag = Db.ExecuteNonQuery(sql);
-            if (flag)
-            {
-                MessageBox.Show("订餐成功！", "Success");
-            }
-            else
-            {
-                MessageBox.Show("订餐失败！", "Error");
-            }
+               //LoadChannel();
             
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void ShowSuccessMessage(string msg="")
         {
-            SelectedDishMenu.Clear();
-            Count = 0;
-            foreach (var item in DishMenu)
+            MessageBoxXConfigurations messageBoxXConfigurations = new MessageBoxXConfigurations();
+            messageBoxXConfigurations.MessageBoxIcon = MessageBoxIcon.Success;
+            MessageBoxX.Show("操作成功！", "Success", Application.Current.MainWindow, MessageBoxButton.OK, messageBoxXConfigurations);
+        }
+
+        public void Refresh(Channel edit)
+        {
+            //LoadChannel();
+            foreach (var item in ChannelList)
             {
-                if (item.IsSelected)
-                {
-                    Count += int.Parse(item.Dish.Price.Substring(0, item.Dish.Price.Length - 1));
-                    SelectedDishMenu.Add(item);
+                if (item.Id == edit.Id)
+                {                   
+                    item.Name = edit.Name;
+                    item.Link = edit.Link;
+                    break;
                 }
             }
         }
 
-        public void SetUser(string phone)
+        private void Vol_Slider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
-            _phone = phone;
-            LoadCol();
+            var val = Vol_Slider.Value;
+            myControl.SourceProvider.MediaPlayer.Audio.Volume = (int)val;
         }
 
-        private void Button_Col(object sender, RoutedEventArgs e)
+        private void dgData_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            
-            SaveCol();
-        }
-
-       
-
-        private void SaveCol()
-        {
-            var col= DishMenu.Where(i => i.IsCol == true).Select(i => i.Dish.Id).ToList();
-            var sb = new StringBuilder();
-            foreach(var item in col)
-            {
-                sb.Append(item + "|");
-            }
-            if (sb.Length > 0)
-            {
-                sb.Remove(sb.Length - 1, 1);
-                var sql = "UPDATE UserInfo SET Col='" + sb.ToString() + "' WHERE phone='" + _phone + "'";
-                var res = Db.ExecuteNonQuery(sql);
-            }
-            else
-            {
-                var sql = "UPDATE UserInfo SET Col=' ' WHERE phone='" + _phone + "'";
-                var res = Db.ExecuteNonQuery(sql);
-            }
-            
+            e.Row.Header = e.Row.GetIndex() + 1;
         }
 
     }

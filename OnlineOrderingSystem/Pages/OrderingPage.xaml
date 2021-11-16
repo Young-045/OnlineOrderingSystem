@@ -7,63 +7,124 @@
              xmlns:local="clr-namespace:OnlineOrderingSystem.Pages"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:pu="clr-namespace:Panuon.UI.Silver;assembly=Panuon.UI.Silver"
-             d:DesignHeight="450"
-             d:DesignWidth="800"
+             xmlns:wpf="clr-namespace:Vlc.DotNet.Wpf;assembly=Vlc.DotNet.Wpf"
+             d:DesignHeight="800"
+             d:DesignWidth="1000"
              mc:Ignorable="d">
     <UserControl.Resources>
         <converter:ColConverter x:Key="ColConverter" />
     </UserControl.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-        <DataGrid Grid.Row="0"
-                  Margin="0"
-                  pu:DataGridHelper.ColumnHorizontalContentAlignment="Center"
-                  AutoGenerateColumns="False"
-                  CanUserAddRows="False"
-                  CanUserDeleteRows="False"
-                  CanUserReorderColumns="False"
-                  CanUserResizeColumns="False"
-                  CanUserResizeRows="False"
-                  CanUserSortColumns="False"
-                  FontSize="16"
-                  GridLinesVisibility="Horizontal"
-                  ItemsSource="{Binding DishMenu}">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn Width="180" Header="菜品">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image Width="180"
-                                   Height="120"
-                                   HorizontalAlignment="Center"
-                                   VerticalAlignment="Center"
-                                   Source="{Binding Dish.Img}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Width="120"
-                                    Binding="{Binding Dish.Name}"
-                                    Header="名称"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Width="100"
-                                    Binding="{Binding Dish.Category}"
-                                    Header="种类"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Width="100"
-                                    Binding="{Binding Dish.Comment}"
-                                    Header="点评"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Width="90"
-                                    Binding="{Binding Dish.Score}"
-                                    Header="推荐分数"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Width="100"
-                                    Binding="{Binding Dish.Price}"
-                                    Header="价格"
-                                    IsReadOnly="True" />
-                <DataGridTemplateColumn Width="120"
+    <DockPanel>
+        <Grid Panel.ZIndex="10" DockPanel.Dock="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Button Name="Button_VolOp"
+                    Grid.Column="1"
+                    Width="120"
+                    Height="40"
+                    Margin="5"
+                    pu:ButtonHelper.ButtonStyle="Outline"
+                    pu:ButtonHelper.CornerRadius="10"
+                    Click="Vol_play"
+                    Content="play"
+                    Foreground="Red"
+                    IsEnabled="False" />
+            <Slider Name="Vol_Slider"
+                    Grid.Column="2"
+                    Width="200"
+                    Height="30"
+                    pu:SliderHelper.Header="音量"
+                    pu:SliderHelper.HeaderWidth="35"
+                    pu:SliderHelper.IsTickValueVisible="True"
+                    pu:SliderHelper.SliderStyle="Classic"
+                    Maximum="100"
+                    TickFrequency="1"
+                    ValueChanged="Vol_Slider_ValueChanged" />
+        </Grid>
+
+
+
+        <Grid Panel.ZIndex="5" DockPanel.Dock="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="70" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <WrapPanel>
+                <TextBox Name="Channel_Name"
+                         Width="230"
+                         Height="40"
+                         Margin="5"
+                         pu:TextBoxHelper.CornerRadius="10"
+                         pu:TextBoxHelper.Header="频道名称: " />
+                <TextBox Name="Channel_Link"
+                         Width="530"
+                         Height="40"
+                         Margin="5"
+                         pu:TextBoxHelper.CornerRadius="10"
+                         pu:TextBoxHelper.Header="频道链接: " />
+                <Button Width="100"
+                        Height="40"
+                        Margin="5"
+                        pu:ButtonHelper.ButtonStyle="Outline"
+                        pu:ButtonHelper.CornerRadius="10"
+                        Click="Button_Add"
+                        Content="添加频道" />
+                <Button Width="100"
+                        Height="40"
+                        Margin="5"
+                        pu:ButtonHelper.ButtonStyle="Outline"
+                        pu:ButtonHelper.CornerRadius="10"
+                        Click="Button_Import"
+                        Content="导入" />
+                <Button Width="100"
+                        Height="40"
+                        Margin="5"
+                        pu:ButtonHelper.ButtonStyle="Outline"
+                        pu:ButtonHelper.CornerRadius="10"
+                        Click="Button_Export"
+                        Content="导出" />
+            </WrapPanel>
+            <DataGrid Grid.Row="1"
+                      Margin="5"
+                      pu:DataGridHelper.ColumnHorizontalContentAlignment="Center"
+                      pu:DataGridHelper.SelectedBackground="LightCyan"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      CanUserReorderColumns="False"
+                      CanUserResizeColumns="False"
+                      CanUserResizeRows="False"
+                      CanUserSortColumns="False"
+                      FontSize="16"
+                      GridLinesVisibility="Horizontal"
+                      HeadersVisibility="Column"
+                      ItemsSource="{Binding ChannelList}"
+                      LoadingRow="dgData_LoadingRow"
+                      RowHeight="80">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Width="150"
+                                            Header="序号"
+                                            IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Margin="10,0,0,0"
+                                           HorizontalAlignment="Left"
+                                           VerticalAlignment="Center"
+                                           Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type DataGridRow}}, Path=Header}" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTextColumn Width="300"
+                                        Binding="{Binding Name}"
+                                        Header="频道名称"
+                                        IsReadOnly="True" />
+
+                    <!--<DataGridTemplateColumn Width="120"
                                         Header="收藏"
                                         IsReadOnly="True">
                     <DataGridTemplateColumn.CellTemplate>
@@ -76,111 +137,66 @@
                                                    Unchecked="Button_Col" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="120"
-                                        Header="选中"
-                                        IsReadOnly="True"
-                                        SortMemberPath="IsSelected">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <CheckBox HorizontalAlignment="Center"
-                                      VerticalAlignment="Center"
-                                      Checked="CheckBox_Checked"
-                                      IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}"
-                                      Unchecked="CheckBox_Checked" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-            </DataGrid.Columns>
-        </DataGrid>
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
-                <RowDefinition />
-                <RowDefinition Height="80" />
-            </Grid.RowDefinitions>
-            <Border Width="500" Background="Aqua">
-                <TextBlock HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           FontSize="17"
-                           Text="已选菜品" />
-            </Border>
-
-            <DataGrid Grid.Row="1"
-                      Margin="0"
-                      pu:DataGridHelper.ColumnHorizontalContentAlignment="Center"
-                      AutoGenerateColumns="False"
-                      CanUserAddRows="False"
-                      CanUserDeleteRows="False"
-                      CanUserReorderColumns="False"
-                      CanUserResizeColumns="False"
-                      CanUserResizeRows="False"
-                      CanUserSortColumns="False"
-                      FontSize="16"
-                      GridLinesVisibility="Horizontal"
-                      ItemsSource="{Binding SelectedDishMenu}">
-                <DataGrid.Columns>
-                    <DataGridTemplateColumn Width="140"
-                                            Header="菜品"
+                </DataGridTemplateColumn>-->
+                    <DataGridTemplateColumn Width="510"
+                                            Header="操作"
+                                            IsReadOnly="True"
                                             SortMemberPath="IsSelected">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <Image Width="120"
-                                       Height="120"
-                                       HorizontalAlignment="Center"
-                                       VerticalAlignment="Center"
-                                       Source="{Binding Dish.Img}" />
+                                <WrapPanel>
+                                    <Button Width="120"
+                                            Height="50"
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            pu:ButtonHelper.ButtonStyle="Outline"
+                                            pu:ButtonHelper.CornerRadius="10"
+                                            Click="Button_Edit"
+                                            Content="编辑"
+                                            Tag="{Binding Id}" />
+                                    <Button Width="120"
+                                            Height="50"
+                                            Margin="5"
+                                            HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            pu:ButtonHelper.ButtonStyle="Outline"
+                                            pu:ButtonHelper.CornerRadius="10"
+                                            Click="Button_Delete"
+                                            Content="删除"
+                                            Tag="{Binding Id}" />
+                                </WrapPanel>
+
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-                    <DataGridTextColumn Width="130"
-                                        Binding="{Binding Dish.Name}"
-                                        Header="名称" />
 
-                    <DataGridTextColumn Width="80"
-                                        Binding="{Binding Dish.Price}"
-                                        Header="价格" />
-                    <DataGridTemplateColumn Width="100"
-                                            Header="选中"
+                    <DataGridTemplateColumn Width="150"
+                                            Header=""
+                                            IsReadOnly="True"
                                             SortMemberPath="IsSelected">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <CheckBox HorizontalAlignment="Center"
-                                          VerticalAlignment="Center"
-                                          IsChecked="{Binding Path=IsSelected, UpdateSourceTrigger=PropertyChanged}" />
+                                <Button Width="120"
+                                        Height="50"
+                                        Margin="5"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        pu:ButtonHelper.ButtonStyle="Outline"
+                                        pu:ButtonHelper.CornerRadius="10"
+                                        Click="Button_Play"
+                                        Content="播放"
+                                        Tag="{Binding Link}" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
+
+
                 </DataGrid.Columns>
             </DataGrid>
-            <WrapPanel Grid.Row="2"
-                       HorizontalAlignment="Center"
-                       VerticalAlignment="Center">
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="16"
-                           Text="共计" />
-                <TextBox Width="60"
-                         Height="20"
-                         Margin="2"
-                         pu:TextBoxHelper.CornerRadius="10"
-                         IsReadOnly="True"
-                         Text="{Binding Count}"
-                         TextAlignment="Center" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="16"
-                           Text="元" />
-                <Button Width="60"
-                        Height="40"
-                        Margin="30,0,0,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Bottom"
-                        pu:ButtonHelper.ButtonStyle="Outline"
-                        pu:ButtonHelper.CornerRadius="10"
-                        Click="Button_Click"
-                        Content="下单"
-                        FontSize="16" />
+            <wpf:VlcControl Name="myControl" Visibility="Collapsed" />
 
-            </WrapPanel>
         </Grid>
-    </Grid>
+    </DockPanel>
+
 </UserControl>

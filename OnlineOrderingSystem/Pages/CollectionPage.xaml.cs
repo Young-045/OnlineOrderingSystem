@@ -1,11 +1,12 @@
-﻿using OnlineOrderingSystem.Controls;
-using OnlineOrderingSystem.DB;
+﻿using DataDal;
+using OnlineOrderingSystem.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using Interfaces;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Infra;
+
 
 namespace OnlineOrderingSystem.Pages
 {
@@ -24,116 +27,36 @@ namespace OnlineOrderingSystem.Pages
     /// </summary>
     public partial class CollectionPage : UserControl, INaviPage, INotifyPropertyChanged
     {
-        private string _phone;
+        //private string _phone;
+        //private DataOperation _dataOperation;
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
 
+        //private ObservableCollection<DishMenuItem> _colDishMenu;
+        //public ObservableCollection<DishMenuItem> ColDishMenu
+        //{
+        //    get { return _colDishMenu; }
+        //    set { _colDishMenu = value; PropertyChanged(this, new PropertyChangedEventArgs("ColDishMenu")); }
+        //}
 
-        private List<DishMenuItem> _dishMenu;
-        public List<DishMenuItem> DishMenu
-        {
-            get { return _dishMenu; }
-            set { _dishMenu = value; PropertyChanged(this, new PropertyChangedEventArgs("DishMenu")); }
-        }
+        //public CollectionPage()
+        //{
+        //    InitializeComponent();
+        //    DataContext = this;
+        //}
 
-        private List<DishMenuItem> _colDishMenu;
-        public List<DishMenuItem> ColDishMenu
-        {
-            get { return _colDishMenu; }
-            set { _colDishMenu = value; PropertyChanged(this, new PropertyChangedEventArgs("ColDishMenu")); }
-        }
+        //public void InitData(string phone)
+        //{
+        //    _phone = phone;
+        //    _dataOperation = new DataOperation();
+        //    ColDishMenu = _dataOperation.LoadCol(phone);
+        //}
 
-        public CollectionPage()
-        {
-            InitializeComponent();
-            DataContext = this;
-        }
+        //private void Button_Col(object sender, RoutedEventArgs e)
+        //{
+        //    _dataOperation.SaveCol(_phone, ColDishMenu);
+        //}
 
-        public void SetUser(string phone)
-        {
-            _phone = phone;
-            LoadCol();
-        }
-
-        private void LoadDishMenu()
-        {
-            XmlDataService ds = new XmlDataService();
-            var dishes = ds.GetDishes();
-            this.DishMenu = new List<DishMenuItem>();
-            foreach (var dish in dishes)
-            {
-                DishMenuItem item = new DishMenuItem();
-                item.Dish = dish;
-                this.DishMenu.Add(item);
-            }
-        }
-
-        private void LoadCol()
-        {
-            string colString = "";
-            var res = Db.ExecuteQuery("SELECT * FROM UserInfo where phone='" + _phone + "'");
-            while (res.Read())
-            {
-                colString = res.GetString(9);
-            }
-            if (DishMenu == null)
-            {
-                LoadDishMenu();
-                ColDishMenu = new List<DishMenuItem>();
-            }
-            if (colString.Equals(" "))
-            {
-                return;
-            }
-            var colAry = colString.Split('|');
-            
-            foreach (var item in DishMenu)
-            {
-                for (int i = 0; i < colAry.Length; i++)
-                {
-                    if (item.Dish.Id == int.Parse(colAry[i]))
-                    {
-                        ColDishMenu.Add(item);
-                        item.IsCol = true;
-                    }
-                }
-
-            }
-        }
-
-
-        private void Button_Col(object sender, RoutedEventArgs e)
-        {
-
-            SaveCol();
-        }
-
-
-
-        private void SaveCol()
-        {
-            var col = DishMenu.Where(i => i.IsCol == true).Select(i => i.Dish.Id).ToList();
-            var sb = new StringBuilder();
-            foreach (var item in col)
-            {
-                sb.Append(item + "|");
-            }
-            if (sb.Length > 0)
-            {
-                sb.Remove(sb.Length - 1, 1);
-                var sql = "UPDATE UserInfo SET Col='" + sb.ToString() + "' WHERE phone='" + _phone + "'";
-                var res = Db.ExecuteNonQuery(sql);
-            }
-            else
-            {
-                var sql = "UPDATE UserInfo SET Col=' ' WHERE phone='" + _phone + "'";
-                var res = Db.ExecuteNonQuery(sql);
-            }
-            //LoadCol();
-            
-
-
-        }
-
+        
 
 
     }

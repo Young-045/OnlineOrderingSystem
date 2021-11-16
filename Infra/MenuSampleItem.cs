@@ -1,14 +1,13 @@
-﻿
-using OnlineOrderingSystem;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Model;
 
-namespace NL.MidEnd.MenuView.WPF4.Controls
+namespace Infra
 {
     public class MenuSampleItem : RadioButton
     {
@@ -58,6 +57,6 @@ namespace NL.MidEnd.MenuView.WPF4.Controls
         public static readonly DependencyProperty TextProperty =
             DependencyProperty.Register(nameof(Text), typeof(string), typeof(MenuSampleItem));
 
-        
+
     }
 }

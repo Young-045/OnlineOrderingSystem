@@ -1,4 +1,6 @@
-﻿using NL.MidEnd.MenuView.WPF4.Controls;
+﻿using Infra;
+using Interfaces;
+using Model;
 using OnlineOrderingSystem.Controls;
 using OnlineOrderingSystem.Pages;
 using System;
@@ -23,24 +25,15 @@ namespace OnlineOrderingSystem
     /// </summary>
     public partial class MainWindow : Window
     {
-        private string _phone;
+        //private string _phone;
         private INaviPage page;
         public MainWindow()
         {
             InitializeComponent();
-            PART_UserInfo.IsChecked = true;
+            PART_Ordering.IsChecked = true;
         }
 
-        public void SetUser(string phone)
-        {
-            _phone = phone;
-           
-            if(page != null)
-            {
-                page.SetUser(phone);
-            }
-        }
-
+      
         private void MenuSampleItem_Checked(object sender, RoutedEventArgs e)
         {
             var control = sender as MenuSampleItem;
@@ -52,25 +45,20 @@ namespace OnlineOrderingSystem
         {            
             switch (naviPage)
             {
-                case NaviPageEnum.UserInfo:
-                    page = new UserInfoPage();
-                    break;
+                
                 case NaviPageEnum.Ordering:
                     page = new OrderingPage();
                     break;
-                case NaviPageEnum.History:
-                    page = new HistoryPage();
+                
                     break;
                 case NaviPageEnum.Collection:
-                    page = new CollectionPage();
+                    //page = new CollectionPage();
                     break;
-                case NaviPageEnum.Evaluation:
-                    page = new EvaluationPage();
-                    break;
+               
                 default:
                     throw new Exception("Error Page");
             }
-            page.SetUser(_phone);
+           
         }
 
 

@@ -4,18 +4,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OnlineOrderingSystem
+namespace Model
 {
     public enum NaviPageEnum
     {
-        UserInfo,
-        Ordering,
-        History,
+        
+        Ordering,        
         Collection,
-        Evaluation,
-        Users,
-        AllHistory,
-        AdminOrdering
+        
 
     }
 }

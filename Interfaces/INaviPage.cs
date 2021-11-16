@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OnlineOrderingSystem.Controls
+namespace Interfaces
 {
-    public enum UpdateOrderingEnum
+    public interface INaviPage
     {
-        Add,
-        Update
+        //void InitData(string phone=null);
     }
 }

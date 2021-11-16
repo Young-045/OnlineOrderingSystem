@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace OnlineOrderingSystem.DB
+namespace DataDal
 {
     public class Db
     {
@@ -53,10 +53,38 @@ namespace OnlineOrderingSystem.DB
             }
             catch(Exception e)
             {
-                MessageBox.Show(e.Message);
+                //MessageBox.Show(e.Message);
             }
             return flag > 0 ? true : false;
         }
+
+        public static bool ImportExecute(List<string> sqls)
+        {
+            // 确保连接打开
+            Open(connection);
+            int flag = -1;
+            try
+            {
+                using (var tr = connection.BeginTransaction())
+                {
+                    foreach (var sql in sqls)
+                    {
+                        using (var command = connection.CreateCommand())
+                        {
+                            command.CommandText = sql;
+                            flag = command.ExecuteNonQuery();
+                        }
+                    }                   
+                    tr.Commit();
+                }
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.Message);
+            }
+            return flag > 0 ? true : false;
+        }
+
 
 
         public static SQLiteDataReader ExecuteQuery(string sql)

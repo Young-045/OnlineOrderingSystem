@@ -1,5 +1,4 @@
 ﻿using Model;
-using OnlineOrderingSystem.DB;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,6 +15,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml.Linq;
+using Panuon.UI.Silver.Core;
+using Panuon.UI.Silver;
+using Interfaces;
+using DataDal;
 
 namespace OnlineOrderingSystem.Controls
 {
@@ -25,13 +28,12 @@ namespace OnlineOrderingSystem.Controls
     public partial class UpdateOrdering : Window, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged = delegate { };
-        private UpdateOrderingEnum _updateOrderingType;
-
-        private Dish _dish;
-        public Dish Dish
+        private ICallBack _callBack;
+        private Channel _channel;
+        public Channel Channel
         {
-            get { return _dish; }
-            set { _dish = value; PropertyChanged(this, new PropertyChangedEventArgs("Dish")); }
+            get { return _channel; }
+            set { _channel = value; PropertyChanged(this, new PropertyChangedEventArgs("Channel")); }
         }
         public UpdateOrdering()
         {
@@ -39,66 +41,58 @@ namespace OnlineOrderingSystem.Controls
             DataContext = this;
         }
 
-        public void Init(UpdateOrderingEnum updateOrderingEnum, int id = 0)
+        public void Init(ICallBack callBack, int id)
         {
-            if (updateOrderingEnum == UpdateOrderingEnum.Update)
+            var res = Db.ExecuteQuery("SELECT * FROM PCMedia where id="+id);
+            if (res.Read())
             {
-                LoadDish(id);
+                Channel = new Channel();
+                Channel.Id = res.GetInt32(0);
+                Channel.Name = res.GetString(1);
+                Channel.Link = res.GetString(2);
             }
-            else
-            {
-                Dish = new Dish();
-            }
-            _updateOrderingType = updateOrderingEnum;
+            _callBack = callBack;
         }
 
-        private void LoadDish(int id)
-        {
-            var sql = "select * from Dishes where id ='" + id + "'";
-            XmlDataService ds = new XmlDataService();
-            Dish = ds.GetDishes(sql).FirstOrDefault();
-
-        }
-
-        private void Choose_Click(object sender, RoutedEventArgs e)
-        {
-            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
-            dialog.Filter = "png|*.png|jpg|*.jpg";
-            if (dialog.ShowDialog() == true)
-            {
-                Dish.Img = dialog.FileName;
-                //var test = new Dish();
-                //test.Img= dialog.FileName;
-                //Dish = test;
-            }
-        }
+         
 
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            string sql = "";
-            var img = DealImgFile();
-            if (_updateOrderingType == UpdateOrderingEnum.Update)
+            if (!JudgeInput())
             {
-                sql = "update Dishes set img='" + img + "',name='" + Dish.Name + "',category='" + Dish.Category + "',comment='" + Dish.Comment + "',score='" + Dish.Score + "',price='" + Dish.Price + "' where id='"+Dish.Id+"'";
-            }
-            else
-            {               
-                sql = string.Format($"INSERT INTO Dishes(img, name, category, comment, score, price) VALUES ('{img}','{Dish.Name}','{Dish.Category}','{Dish.Comment}', '{Dish.Score}', '{Dish.Price}')");
-            }
-            var res=Db.ExecuteNonQuery(sql);
-            if(res)
+                return;
+            }            
+            string sql = "update PCMedia set name='" + Channel.Name.Trim() + "',link='" + Channel.Link.Trim() + "'where id='" + Channel.Id + "'";           
+            var res = Db.ExecuteNonQuery(sql);
+            if (res)
             {
-                MessageBox.Show("操作成功", "Success");
                 this.Close();
+                MessageBoxXConfigurations messageBoxXConfigurations = new MessageBoxXConfigurations();
+                messageBoxXConfigurations.MessageBoxIcon = MessageBoxIcon.Success;
+                MessageBoxX.Show("操作成功！", "Success", Application.Current.MainWindow, MessageBoxButton.OK, messageBoxXConfigurations);
+                _callBack.Refresh(Channel);                
             }
         }
-        private string DealImgFile()
+       
+
+        private bool JudgeInput()
         {
-            var imgFileType = Dish.Img.Split('.').LastOrDefault();
-            var fileName = Guid.NewGuid().ToString() + "." + imgFileType;
-            var targetPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"Img\" + fileName);
-            System.IO.File.Copy(Dish.Img, targetPath, true);
-            return fileName;
+            var name = Channel.Name.Trim();
+            var link = Channel.Link.Trim();            
+            MessageBoxXConfigurations messageBoxXConfigurations = new MessageBoxXConfigurations();
+            messageBoxXConfigurations.MessageBoxIcon = MessageBoxIcon.Error;
+            if (string.IsNullOrEmpty(name))
+            {
+                MessageBoxX.Show("名称不能为空！", "Error", Application.Current.MainWindow, MessageBoxButton.OK, messageBoxXConfigurations);
+                return false;
+            }
+            if (string.IsNullOrEmpty(link))
+            {
+                MessageBoxX.Show("链接不能为空！", "Error", Application.Current.MainWindow, MessageBoxButton.OK, messageBoxXConfigurations);
+                return false;
+            }
+            
+            return true;
         }
 
 
